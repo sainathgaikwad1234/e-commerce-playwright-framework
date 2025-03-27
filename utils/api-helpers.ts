@@ -13,7 +13,7 @@ dotenv.config();
  * API Helpers for making API requests and handling responses
  */
 export class ApiHelpers {
-  private request: APIRequestContext;
+  private request!: APIRequestContext;
   private baseUrl: string;
   private authToken?: string;
 
