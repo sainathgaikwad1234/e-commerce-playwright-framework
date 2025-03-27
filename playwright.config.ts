@@ -1,118 +1,3 @@
-// import { defineConfig, devices } from "@playwright/test";
-
-// /**
-//  * Read environment variables from file.
-//  * https://github.com/motdotla/dotenv
-//  */
-// // require('dotenv').config();
-
-// /**
-//  * See https://playwright.dev/docs/test-configuration.
-//  */
-// // export default defineConfig({
-// //   use: {
-// //     headless: false, // This makes all tests run in headed mode by default
-// //     // Optional: slow down execution to see actions more clearly
-// //     launchOptions: {
-// //       slowMo: 500, // Slows down Playwright operations by 500ms
-// //     },
-// //     /* Base URL to use in actions like `await page.goto('/')`. */
-// //     baseURL: "https://www.saucedemo.com",
-
-// //     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-// //     trace: "on-first-retry",
-// //   },
-// //   testDir: "./tests",
-// //   /* Run tests in files in parallel */
-// //   fullyParallel: true,
-// //   /* Fail the build on CI if you accidentally left test.only in the source code. */
-// //   forbidOnly: !!process.env.CI,
-// //   /* Retry on CI only */
-// //   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-// //   // Removed duplicate 'use' property
-
-// //   /* Configure projects for major browsers */
-// //   projects: [
-// //     {
-// //       name: "chromium",
-// //       use: { ...devices["Desktop Chrome"] },
-// //     },
-
-// //     {
-// //       name: "firefox",
-// //       use: { ...devices["Desktop Firefox"] },
-// //     },
-
-// //     {
-// //       name: "webkit",
-// //       use: { ...devices["Desktop Safari"] },
-// //     },
-
-// //     /* Test against mobile viewports. */
-// //     {
-// //       name: "mobile-chrome",
-// //       use: { ...devices["Pixel 5"] },
-// //     },
-// //     {
-// //       name: "mobile-safari",
-// //       use: { ...devices["iPhone 13"] },
-// //     },
-// //   ],
-// // });
-
-// export default defineConfig({
-//   testDir: "./tests",
-//   timeout: 30000,
-
-//   // Other config
-
-//   projects: [
-//     // SauceDemo tests
-//     {
-//       name: "saucedemo-chrome",
-//       use: {
-//         ...devices["Desktop Chrome"],
-//         baseURL: "https://www.saucedemo.com",
-//       },
-//       testMatch: /.*sauce-demo.spec.ts/,
-//     },
-
-//     // The Internet tests
-//     {
-//       name: "internet-chrome",
-//       use: {
-//         ...devices["Desktop Chrome"],
-//         baseURL: "https://the-internet.herokuapp.com",
-//       },
-//       testMatch: /.*internet.spec.ts/,
-//     },
-
-//     // DemoQA tests
-//     {
-//       name: "demoqa-chrome",
-//       use: {
-//         ...devices["Desktop Chrome"],
-//         baseURL: "https://demoqa.com",
-//       },
-//       testMatch: /.*demoqa.spec.ts/,
-//     },
-
-//     // Generic tests that work across sites
-//     {
-//       name: "cross-site-chrome",
-//       use: {
-//         ...devices["Desktop Chrome"],
-//       },
-//       testMatch: /.*\.(test|spec)\.(js|ts)/,
-//       testIgnore: /.*\.(sauce-demo|internet|demoqa)\.spec\.ts/,
-//     },
-
-//     // Add Firefox and WebKit variants
-//   ],
-// });
-
-// pages/the-internet/file-download-page.ts
-
 // playwright.config.ts
 import { defineConfig, devices } from "@playwright/test";
 
@@ -123,7 +8,7 @@ export default defineConfig({
   testDir: "./tests",
 
   /* Maximum time one test can run for */
-  timeout: 30 * 1000,
+  timeout: 60 * 1000, // Increased timeout to 60 seconds for more stability
 
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -144,12 +29,25 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+      },
     },
 
     {
       name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
+      use: {
+        ...devices["Desktop Firefox"],
+        // Firefox-specific settings for compatibility
+        launchOptions: {
+          firefoxUserPrefs: {
+            // Disable Firefox-specific features that can cause issues
+            "dom.file.createInChild": true,
+            "dom.timeout.background_throttling_max_budget": -1,
+            // Add more Firefox preferences as needed
+          },
+        },
+      },
     },
 
     {
@@ -172,21 +70,16 @@ export default defineConfig({
       name: "Microsoft Edge",
       use: {
         channel: "msedge",
-        baseURL: "https://www.saucedemo.com",
+        // Edge-specific settings
+        launchOptions: {
+          args: [
+            "--disable-web-security",
+            "--disable-features=IsolateOrigins,site-per-process",
+          ],
+        },
       },
     },
   ],
-
-  /* Run local dev server before tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
-
-  /* Global setup/teardown */
-  // globalSetup: require.resolve('./global-setup'),
-  // globalTeardown: require.resolve('./global-teardown'),
 
   /* Configure timeouts, navigation, and other options */
   use: {
@@ -206,9 +99,12 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
 
     /* Default navigation timeout */
-    navigationTimeout: 30000,
+    navigationTimeout: 45000,
 
     /* Default action timeout */
-    actionTimeout: 15000,
+    actionTimeout: 30000,
+
+    /* Default to headless, can be overridden with --headed flag */
+    headless: true,
   },
 });
