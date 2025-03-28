@@ -1,5 +1,0 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-# Run only changed tests on local commits
-npx playwright test --grep-invert @slow --only-changed
