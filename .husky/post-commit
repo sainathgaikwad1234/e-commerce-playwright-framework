@@ -1,0 +1,6 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Automatically add state.json file
+git add state.json
+git commit --amend --no-edit

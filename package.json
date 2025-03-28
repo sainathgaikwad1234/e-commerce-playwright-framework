@@ -30,7 +30,7 @@
   "license": "ISC",
   "devDependencies": {
     "@faker-js/faker": "^8.0.0",
-    "@playwright/test": "^1.40.0",
+    "@playwright/test": "^1.51.1",
     "@types/pixelmatch": "^5.2.6",
     "@types/pngjs": "^6.0.5",
     "allure-playwright": "^2.4.0",
@@ -38,7 +38,9 @@
     "dotenv": "^16.3.1",
     "eslint": "^8.47.0",
     "eslint-plugin-playwright": "^0.15.3",
+    "husky": "^9.1.7",
     "pixelmatch": "^5.3.0",
+    "playwright-cli-select": "^1.0.6",
     "prettier": "^3.0.1",
     "typescript": "^5.1.6"
   }

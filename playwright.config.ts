@@ -23,7 +23,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   /* Reporter to use */
-  reporter: [["html"], ["list"]],
+  reporter: [["list"], ["html"], ["github"], ["./state-reporter.js"]],
 
   /* Configure projects for major browsers */
   projects: [

@@ -1,0 +1,54 @@
+name: Reusable Playwright Workflow
+
+on:
+  workflow_call:
+    inputs:
+      run-time-mins:
+        required: true
+        type: number
+      command:
+        required: true
+        type: string
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      dynamic-matrix: ${{ steps.runwright.outputs.dynamic-matrix }}
+      recommended-workers: ${{ steps.runwright.outputs.recommended-workers }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: RunWright Calculation
+        id: runwright
+        uses: runwright/action@v1
+        with:
+          total-run-time-in-mins: ${{ inputs.run-time-mins }}
+          pw-command-to-execute: ${{ inputs.command }}
+
+  test:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.prepare.outputs.dynamic-matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      - name: Run tests
+        run: ${{ inputs.command }} --worker=${{ needs.prepare.outputs.recommended-workers }} ${{ matrix.testFiles }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.id }}
+          path: playwright-report/
+          retention-days: 5

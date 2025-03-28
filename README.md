@@ -238,4 +238,207 @@ Execute the batch file or run `npx playwright test --project=chromium --headed` 
 - Create new test files in the relevant test category
 - Update the configuration for any special requirements
 
-This enterprise-grade framework provides a solid foundation for automated web testing across multiple applications and browsers, with emphasis on maintainability, reliability, and comprehensive coverage of modern web application features.
+## Playwright CLI Tools
+
+This project uses the `playwright-cli-select` tool to enhance the testing workflow with Playwright. This section documents how to use the CLI tools effectively.
+
+## Installation
+
+The `playwright-cli-select` tool should be installed as a dev dependency in your project:
+
+```bash
+npm install playwright-cli-select --save-dev
+```
+
+## Usage
+
+### Running Tests with Selection UI
+
+To run tests with an interactive selection UI:
+
+```bash
+npx playwright-cli-select run
+```
+
+This command allows you to:
+
+- Select specific test files to run
+- Choose test cases by their tags (e.g., @smoke, @regression)
+- Configure browser and other runtime options
+
+### Common Commands
+
+#### Run all tests
+
+```bash
+npx playwright-cli-select run
+```
+
+#### Run tests with specific tags
+
+```bash
+npx playwright-cli-select run --tag smoke
+```
+
+#### Run tests in a specific browser
+
+```bash
+npx playwright-cli-select run --browser chromium
+```
+
+#### Run tests in headed mode (visible browser)
+
+```bash
+npx playwright-cli-select run --headed
+```
+
+#### Generate test reports
+
+```bash
+npx playwright-cli-select run --reporter=html
+```
+
+## Configuration
+
+The tool uses your existing Playwright configuration (`playwright.config.ts`) for most settings. Additional CLI options will override those settings when specified.
+
+## Troubleshooting
+
+### JSON Parsing Errors
+
+If you encounter JSON parsing errors like:
+
+```
+SyntaxError: Unexpected token 'S', "Successful"... is not valid JSON
+```
+
+This may be caused by:
+
+1. Console.log statements interfering with the CLI parser
+2. Invalid JSON format in your test data files
+3. Stdout/stderr capture conflicts
+
+**Solutions:**
+
+- Remove or modify console.log statements in test initialization code
+- Ensure test data files are properly formatted JSON
+- Use console.error instead of console.log for messages during setup
+
+### Other Common Issues
+
+- **Command not found**: Ensure the package is installed and the path is correct
+- **Tests not appearing in selection**: Check that your test files follow the naming pattern recognized by Playwright
+- **Browser launch failures**: Verify browser installations with `npx playwright install`
+
+## Advanced Usage
+
+### Custom Test Selection Criteria
+
+You can create custom selectors by combining tags, file patterns, and test names:
+
+```bash
+npx playwright-cli-select run --tag smoke --testNamePattern="login|checkout"
+```
+
+### Integration with CI/CD
+
+For CI/CD environments, you can bypass the interactive selection:
+
+```bash
+npx playwright-cli-select run --tag regression --ci
+```
+
+## Recommended Practices
+
+1. **Tag your tests** with descriptive markers (@smoke, @regression, @e2e)
+2. **Avoid console.log** in code that executes during test discovery
+3. **Use proper JSON** for all data files
+4. **Handle errors gracefully** when loading test data
+
+## GitHub Actions Integration
+
+This project uses GitHub Actions for continuous integration testing. The workflow automatically runs tests on code changes and pull requests.
+
+### Workflow Configuration
+
+The GitHub Actions workflow is defined in `.github/workflows/playwright.yml`:
+
+```yaml
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Run Playwright tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Install Microsoft Edge
+        run: npx playwright install msedge
+
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+```
+
+### Features
+
+- **Automatic Trigger**: Tests run automatically on pushes and pull requests to main/master branches
+- **Browser Installation**: Installs all required browsers including Microsoft Edge
+- **Dependency Caching**: Caches npm dependencies for faster workflow execution
+- **HTML Reports**: Generates and uploads HTML reports as artifacts
+- **Failure Handling**: Uploads test reports even when tests fail
+
+### Viewing Test Results
+
+1. Go to the "Actions" tab in your GitHub repository
+2. Click on the latest workflow run
+3. Scroll down to the "Artifacts" section
+4. Download the "playwright-report" artifact to view the HTML test report
+
+### Customizing the Workflow
+
+To modify the GitHub Actions workflow:
+
+1. Edit the `.github/workflows/playwright.yml` file
+2. Commit and push your changes
+3. GitHub will use the updated workflow for future runs
+
+You can customize:
+
+- The trigger events (which branches, events, etc.)
+- Test execution strategy (browsers, parallelism)
+- Environment variables and secrets
+- Notification settings
+
+## Resources
+
+- [Playwright Documentation](https://playwright.dev/docs/intro)
+- [playwright-cli-select on npm](https://www.npmjs.com/package/playwright-cli-select)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Playwright GitHub Actions](https://playwright.dev/docs/ci-intro)
